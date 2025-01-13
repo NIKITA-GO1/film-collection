@@ -1,0 +1,25 @@
+version: '4.37.2' # Если используете версию Compose 3.8, убедитесь, что этот параметр поддерживается.
+
+services:
+  app:
+    build:
+      context: .  # Указывает, что контекст сборки корневой директории проекта
+      dockerfile: cmd/Dockerfile  # Указываем файл Dockerfile внутри папки cmd
+    ports:
+      - "8080:8080"
+    environment:
+      - DATABASE_URL=postgresql://user:password@db:5432/mydb
+    depends_on:
+      - db
+
+  db:
+    image: postgres:latest
+    restart: always
+    environment:
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: mydb
+    ports:
+      - "5432:5432"
+    volumes:
+      - ./cmd/init.sql:/docker-entrypoint-initdb.d/init.sql
