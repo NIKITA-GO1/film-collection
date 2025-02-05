@@ -2,26 +2,37 @@ package main
 
 import (
 	"database/sql"
+	"film-collection/models"
 	"fmt"
-	"log"
-	"os"
 
 	_ "github.com/lib/pq"
 )
 
 func main() {
-	connStr := os.Getenv("DATABASE_URL")
+	const connStr = "postgres://user:password@localhost:5432/mydb?sslmode=disable"
 	db, err := sql.Open("postgres", connStr)
 	if err != nil {
-		log.Fatal("Error opening database: ", err)
+		panic(err)
 	}
-	defer db.Close()
-
-	// Пинг базы данных
-	err = db.Ping()
+	fmt.Println("Успешное открытие бд")
+	query := `drop table if exists films;
+			create table if not exists films(
+				name text,
+				description text,
+				release_date text,
+				rate integer,
+				actors text[]
+			);
+	`
+	_, err = db.Exec(query)
 	if err != nil {
-		log.Fatal("Error connecting to the database: ", err)
+		panic(err)
 	}
-
-	fmt.Println("Successfully connected to the database!")
+	actors_cast := make([]string, 5)
+	actors_cast = append(actors_cast, "jason statham")
+	fmt.Println("Create table films")
+	meg := models.Film{Name: "meg", Discription: "film pro akuly", ReleaseDate: "hz 2019 god mb", Rate: 10, Actors: actors_cast}
+	err = meg.AddFilm(meg)
+	err = meg.DeleteActorFromFilm("Jake Chan", meg.Name)
+	fmt.Println(err)
 }
