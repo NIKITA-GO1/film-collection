@@ -3,6 +3,7 @@ package postgres
 import (
 	"database/sql"
 	"film-collection/internal/film"
+	"fmt"
 
 	"github.com/Masterminds/squirrel"
 	"github.com/lib/pq"
@@ -21,9 +22,51 @@ func (r *FilmRepository) SaveFilm(f *film.Film) error {
 	return err
 }
 
-func (r *FilmRepository) UpdateFilm(db *sql.DB, id int, name, discription, releaseDate, rate, actors any) error {
-	var finalError error
-	queryMap := make(map[string]any)
+func (r *FilmRepository) UpdateFilm(db *sql.DB, id int, name, discription, releaseDate string, rate int) error {
+	queryBuilder := squirrel.Update("films")
+
+	updateCount := 0
+	if name != "" {
+		queryBuilder = queryBuilder.Set("name", name)
+		updateCount++
+	}
+	if discription != "" { // Убедитесь, что здесь то же самое имя, что и в БД
+		queryBuilder = queryBuilder.Set("discription", discription)
+		updateCount++
+	}
+	if releaseDate != "" {
+		queryBuilder = queryBuilder.Set("release_date", releaseDate)
+		updateCount++
+	}
+	if rate != 0 {
+		queryBuilder = queryBuilder.Set("rate", rate)
+		updateCount++
+	}
+
+	// Если ничего не обновляется, возвращаем ошибку
+	if updateCount == 0 {
+		return fmt.Errorf("no fields to update")
+	}
+
+	// Генерация SQL-запроса и аргументов
+	query, args, err := queryBuilder.Where("id = ?", id).ToSql()
+	if err != nil {
+		return err
+	}
+
+	fmt.Println("Query:", query)
+	fmt.Println("Args:", args)
+
+	// Проверяем, что args имеет правильное количество элементов
+	if len(args) != updateCount {
+		return fmt.Errorf("argument count mismatch, expected %d but got %d", updateCount, len(args))
+	}
+
+	// Выполняем запрос
+	_, err = db.Exec(query, args...)
+	return err
+
+	/*queryMap := make(map[string]any)
 	queryMap["ID"] = id
 	if name != nil {
 		queryMap["name"] = name
@@ -41,6 +84,7 @@ func (r *FilmRepository) UpdateFilm(db *sql.DB, id int, name, discription, relea
 		queryMap["actors"] = actors
 	}
 	for key, value := range queryMap {
+		fmt.Println(key, value)
 		query, args, err := squirrel.Update("films").
 			Set(key, value).Where(squirrel.Eq{"id": queryMap["ID"]}).ToSql()
 
@@ -52,6 +96,7 @@ func (r *FilmRepository) UpdateFilm(db *sql.DB, id int, name, discription, relea
 
 	}
 	return finalError
+	*/
 }
 
 func (r *FilmRepository) DeleteFilm(id int) error {

@@ -14,8 +14,8 @@ func (s *Service) SaveFilm(film *Film) error {
 	return s.repo.SaveFilm(film)
 }
 
-func (s *Service) UpdateFilm(db *sql.DB, id int, name, discription, releaseDate, rate, actors any) error {
-	return s.repo.UpdateFilm(db, id, name, discription, releaseDate, rate, actors)
+func (s *Service) UpdateFilm(db *sql.DB, id int, name, discription, releaseDate string, rate int) error {
+	return s.repo.UpdateFilm(db, id, name, discription, releaseDate, rate)
 }
 
 func (s *Service) DeleteFilm(filmID int) error {
