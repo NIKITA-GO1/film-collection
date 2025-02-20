@@ -2,6 +2,7 @@ package actor
 
 import (
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"strconv"
 )
@@ -27,10 +28,9 @@ func (h *ActorHandler) CreateActor(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
-
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusCreated)
-	json.NewEncoder(w).Encode(actor)
+	fmt.Println(json.NewEncoder(w).Encode(actor))
 }
 
 func (h *ActorHandler) UpdateActor(w http.ResponseWriter, r *http.Request) {

@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"net/http"
 	"strconv"
+	"unicode/utf8"
 )
 
 type FilmHandler struct {
@@ -64,6 +65,19 @@ func (h *FilmHandler) CreateFilm(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	if utf8.RuneCountInString(film.Name) < 1 || 150 < utf8.RuneCountInString(film.Name) {
+		http.Error(w, "Film name must be between 1 and 150 characters", http.StatusBadRequest)
+		return
+	}
+	if utf8.RuneCountInString(film.Discription) > 1000 {
+		http.Error(w, "Film description cant be more than 1000 characters", http.StatusBadRequest)
+		return
+	}
+	if film.Rate < 1 || film.Rate > 10 {
+		http.Error(w, "Rate must be between 1 and 10", http.StatusBadRequest)
+		return
+	}
+
 	err = h.service.SaveFilm(&film)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -86,6 +100,18 @@ func (h *FilmHandler) UpdateFilm(w http.ResponseWriter, r *http.Request) {
 	err = json.NewDecoder(r.Body).Decode(&film)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+	if utf8.RuneCountInString(film.Name) < 1 || 150 < utf8.RuneCountInString(film.Name) {
+		http.Error(w, "Film name must be between 1 and 150 characters", http.StatusBadRequest)
+		return
+	}
+	if utf8.RuneCountInString(film.Discription) > 1000 {
+		http.Error(w, "Film description cant be more than 1000 characters", http.StatusBadRequest)
+		return
+	}
+	if film.Rate < 1 || film.Rate > 10 {
+		http.Error(w, "Rate must be between 1 and 10", http.StatusBadRequest)
 		return
 	}
 

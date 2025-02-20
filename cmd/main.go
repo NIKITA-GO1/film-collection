@@ -2,11 +2,9 @@ package main
 
 import (
 	"database/sql"
-	"fmt"
-
-	//"film-collection/internal/actor"
 	"film-collection/internal/film"
 	"film-collection/pkg/postgres"
+	"fmt"
 
 	_ "github.com/lib/pq"
 )
