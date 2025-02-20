@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"net/http"
 	"strconv"
+
+	"github.com/asaskevich/govalidator"
 )
 
 type ActorHandler struct {
@@ -22,7 +24,10 @@ func (h *ActorHandler) CreateActor(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
-
+	if _, err := govalidator.ValidateStruct(actor); err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
 	err = h.service.SaveActor(&actor)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -43,6 +48,10 @@ func (h *ActorHandler) UpdateActor(w http.ResponseWriter, r *http.Request) {
 	var actor Actor
 	err = json.NewDecoder(r.Body).Decode(&actor)
 	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+	if _, err := govalidator.ValidateStruct(actor); err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
