@@ -3,8 +3,10 @@ package main
 import (
 	"database/sql"
 	"film-collection/internal/film"
+	"film-collection/internal/film/service"
 	"film-collection/pkg/postgres"
 	"fmt"
+	"net/http"
 
 	_ "github.com/lib/pq"
 )
@@ -19,9 +21,14 @@ func main() {
 
 	filmRepo := postgres.NewFilmRepository(db)
 
-	filmService := film.NewService(filmRepo)
+	filmService := service.NewService(filmRepo)
+	filmHandler := film.NewFilmHandler(*filmService)
+	http.HandleFunc("/films", filmHandler.CreateFilm)
+	http.HandleFunc("/films/", filmHandler.UpdateFilm)
 
-	if err := filmService.DeleteActorFromFilm(8, 1); err != nil {
-		fmt.Println("Error update film:", err)
+	err = http.ListenAndServe(`:8080`, nil)
+	if err != nil {
+		fmt.Println(err)
 	}
+
 }
